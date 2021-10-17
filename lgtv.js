@@ -44,10 +44,12 @@ async function _mainSwitchToTv(lgtvConfig) {
     await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_2'});
     lgtv.disconnect();
 
+    // In testing, this really didn't like full paths for -configure for some reason, maybe escaping weirdness?
     spawn('E:\\Programs\\dc2.exe', ['-configure=dc2_tv_config.xml'])
     spawn('cmd.exe', ['/c', 'net stop audiosrv']);
     spawn('cmd.exe', ['/c', 'net start audiosrv']);
 
+    // The websocket takes a while to disconnect, which keeps the console open for a bit, this is a hack to skip that
     process.exit(0);
 }
 
@@ -57,10 +59,9 @@ async function _mainSwitchToMonitors(lgtvConfig) {
     await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_4'});
 
     // lgtv doesn't wait until the command finishes, so give it a bit of time to finish before turning off
-    setTimeout(async () => {
-        await _tryLgtvRequest(lgtv, 'ssap://system/turnOff');
-        lgtv.disconnect();
-    }, 3000);
+    await _asyncSleep(2000);
+    await _tryLgtvRequest(lgtv, 'ssap://system/turnOff');
+    lgtv.disconnect();
 
     spawn('E:\\Programs\\dc2.exe', ['-configure=dc2_monitors_config.xml'])
     spawn('cmd.exe', ['/c', 'net stop audiosrv']);
@@ -87,7 +88,7 @@ async function _tryLgtvConnect(tvIp) {
         lgtv.on('connect', () => {
             console.log(`Connected to LG TV at ${url}`);
             resolve(lgtv);
-        })
+        });
     });
 }
 
@@ -108,7 +109,13 @@ async function _tryLgtvRequest(lgtv, url, payload) {
             console.log(`Request to url ${url} complete`)
             resolve(resp)
         });
-    })
+    });
+}
+
+async function _asyncSleep(timeout) {
+    return new Promise(resolve => {
+        setTimeout(() => resolve(), timeout);
+    });
 }
 
 main();
