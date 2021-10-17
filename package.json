@@ -1,0 +1,13 @@
+{
+  "name": "home_automation",
+  "version": "1.0.0",
+  "description": "Personal home automation scripts.",
+  "main": "index.js",
+  "author": "Eric Wang <johnericcw@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "lgtv2": "^1.6.3",
+    "wol": "^1.0.7"
+  }
+}
