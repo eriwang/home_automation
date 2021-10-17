@@ -41,19 +41,21 @@ async function _mainSwitchToTv(lgtvConfig) {
     });
 
     let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
+
     await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_2'});
     lgtv.disconnect();
 
-    // In testing, this really didn't like full paths for -configure for some reason, maybe escaping weirdness?
-    spawn('E:\\Programs\\dc2.exe', ['-configure=dc2_tv_config.xml'])
-    spawn('cmd.exe', ['/c', 'net stop audiosrv']);
-    spawn('cmd.exe', ['/c', 'net start audiosrv']);
+    // dc2.exe throws an ERROR_GEN_FAILURE without some extra time to swap inputs, maybe something to do with HDR?
+    await _asyncSleep(2000);
+    _swapDisplays('dc2_tv_config.xml');
 
     // The websocket takes a while to disconnect, which keeps the console open for a bit, this is a hack to skip that
     process.exit(0);
 }
 
 async function _mainSwitchToMonitors(lgtvConfig) {
+    _swapDisplays('dc2_monitors_config.xml');
+
     let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
 
     await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_4'});
@@ -62,10 +64,6 @@ async function _mainSwitchToMonitors(lgtvConfig) {
     await _asyncSleep(2000);
     await _tryLgtvRequest(lgtv, 'ssap://system/turnOff');
     lgtv.disconnect();
-
-    spawn('E:\\Programs\\dc2.exe', ['-configure=dc2_monitors_config.xml'])
-    spawn('cmd.exe', ['/c', 'net stop audiosrv']);
-    spawn('cmd.exe', ['/c', 'net start audiosrv']);
 
     process.exit(0);
 }
@@ -110,6 +108,15 @@ async function _tryLgtvRequest(lgtv, url, payload) {
             resolve(resp)
         });
     });
+}
+
+function _swapDisplays(config) {
+    // In testing, this really didn't like full paths for -configure for some reason, maybe escaping weirdness?
+    spawn('E:\\Programs\\dc2.exe', [`-configure=${config}`]);
+
+    // Display Changer has some annoyances where the audio doesn't swap with the display, this works around that
+    spawn('cmd.exe', ['/c', 'net stop audiosrv']);
+    spawn('cmd.exe', ['/c', 'net start audiosrv']);
 }
 
 async function _asyncSleep(timeout) {
