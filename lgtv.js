@@ -1,6 +1,7 @@
 const wol = require('wol');
 
 const process = require('process');
+const spawn = require('child_process').spawnSync;
 
 const Modes = {
     SWITCH_TO_TV: 'switch_to_tv',
@@ -42,6 +43,12 @@ async function _mainSwitchToTv(lgtvConfig) {
     let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
     await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_2'});
     lgtv.disconnect();
+
+    spawn('E:\\Programs\\dc2.exe', ['-configure=dc2_tv_config.xml'])
+    spawn('cmd.exe', ['/c', 'net stop audiosrv']);
+    spawn('cmd.exe', ['/c', 'net start audiosrv']);
+
+    process.exit(0);
 }
 
 async function _mainSwitchToMonitors(lgtvConfig) {
@@ -54,6 +61,12 @@ async function _mainSwitchToMonitors(lgtvConfig) {
         await _tryLgtvRequest(lgtv, 'ssap://system/turnOff');
         lgtv.disconnect();
     }, 3000);
+
+    spawn('E:\\Programs\\dc2.exe', ['-configure=dc2_monitors_config.xml'])
+    spawn('cmd.exe', ['/c', 'net stop audiosrv']);
+    spawn('cmd.exe', ['/c', 'net start audiosrv']);
+
+    process.exit(0);
 }
 
 async function _tryLgtvConnect(tvIp) {
