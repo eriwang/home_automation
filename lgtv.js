@@ -5,7 +5,8 @@ const spawn = require('child_process').spawnSync;
 
 const Modes = {
     SWITCH_TO_TV: 'switch_to_tv',
-    SWITCH_TO_MONITORS: 'switch_to_monitors'
+    SWITCH_TO_MONITORS: 'switch_to_monitors',
+    SWITCH_TO_UPPER_ONLY: 'switch_to_upper'
 };
 
 async function main() {
@@ -18,7 +19,11 @@ async function main() {
             return;
 
         case Modes.SWITCH_TO_MONITORS:
-            _mainSwitchToMonitors(lgtvConfig)
+            await _mainSwitchToMonitors(lgtvConfig)
+            return;
+
+        case Modes.SWITCH_TO_UPPER_ONLY:
+            await _mainSwitchToUpper();
             return;
     }
 }
@@ -40,13 +45,14 @@ async function _mainSwitchToTv(lgtvConfig) {
         }
     });
 
-    let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
+    // LG seems to have updated their API and now this doesn't work. RIP
+    // let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
 
-    await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_2'});
-    lgtv.disconnect();
+    // await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_2'});
+    // lgtv.disconnect();
 
-    // dc2.exe throws an ERROR_GEN_FAILURE without some extra time to swap inputs, maybe something to do with HDR?
-    await _asyncSleep(2000);
+    // // dc2.exe throws an ERROR_GEN_FAILURE without some extra time to swap inputs, maybe something to do with HDR?
+    // await _asyncSleep(2000);
     _swapDisplays('dc2_tv_config.xml');
 
     // The websocket takes a while to disconnect, which keeps the console open for a bit, this is a hack to skip that
@@ -56,15 +62,21 @@ async function _mainSwitchToTv(lgtvConfig) {
 async function _mainSwitchToMonitors(lgtvConfig) {
     _swapDisplays('dc2_monitors_config.xml');
 
-    let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
+    // RIP
+    // let lgtv = await _tryLgtvConnect(lgtvConfig['tv_ip'])
 
-    await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_4'});
+    // await _tryLgtvRequest(lgtv, 'ssap://tv/switchInput', {inputId: 'HDMI_4'});
 
-    // lgtv doesn't wait until the command finishes, so give it a bit of time to finish before turning off
-    await _asyncSleep(2000);
-    await _tryLgtvRequest(lgtv, 'ssap://system/turnOff');
-    lgtv.disconnect();
+    // // lgtv doesn't wait until the command finishes, so give it a bit of time to finish before turning off
+    // await _asyncSleep(2000);
+    // await _tryLgtvRequest(lgtv, 'ssap://system/turnOff');
+    // lgtv.disconnect();
 
+    process.exit(0);
+}
+
+async function _mainSwitchToUpper() {
+    _swapDisplays('dc2_upper_only_config.xml');
     process.exit(0);
 }
 
@@ -80,6 +92,7 @@ async function _tryLgtvConnect(tvIp) {
         });
 
         lgtv.on('error', (err) => {
+            console.error(err);
             throw err;
         });
 
