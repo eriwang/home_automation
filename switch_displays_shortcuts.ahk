@@ -3,13 +3,13 @@ Hotkey, ^!g, SwitchToGamingTv
 Hotkey, ^!u, SwitchToUpperOnly
 
 SwitchToMonitor() {
-    Run, node %A_WorkingDir%\lgtv.js switch_to_monitors
+    RunWait, %A_WorkingDir%\venv\Scripts\python.exe %A_WorkingDir%\main.py switch_to_monitors
 }
 
 SwitchToGamingTv() {
-    Run, node %A_WorkingDir%\lgtv.js switch_to_tv
+    RunWait, %A_WorkingDir%\venv\Scripts\python.exe %A_WorkingDir%\main.py switch_to_tv
 }
 
 SwitchToUpperOnly() {
-    Run, node %A_WorkingDir%\lgtv.js switch_to_upper
+    RunWait, %A_WorkingDir%\venv\Scripts\python.exe %A_WorkingDir%\main.py switch_to_upper
 }

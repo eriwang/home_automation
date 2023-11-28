@@ -29,6 +29,8 @@ def main():
     if args.command == 'switch_to_tv':
         # Turn on the TV. This is busted in the package, fortunately the implementation is a one-liner
         wakeonlan.send_magic_packet(config['mac'])
+
+        time.sleep(2)  # Give the TV time so it can receive the command
         _exec_tv_command(config, 'setInput', 'HDMI_2')
 
         time.sleep(2)  # Give the computer time to actually detect the TV before switching displays
