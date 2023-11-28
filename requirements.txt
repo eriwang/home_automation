@@ -1,0 +1,9 @@
+certifi==2023.11.17
+charset-normalizer==3.3.2
+getmac==0.9.4
+idna==3.6
+LGTV @ git+https://github.com/klattimer/LGWebOSRemote@1add0ee9470a7323bb5134883cc719780abda177
+requests==2.31.0
+urllib3==2.1.0
+wakeonlan==3.1.0
+ws4py==0.5.1
