@@ -26,11 +26,19 @@ def main():
     parser.add_argument('command')
     args = parser.parse_args()
 
+    # TODO: doesn't argparse handle this natively?
     if args.command == 'switch_to_tv':
         # Turn on the TV. This is busted in the package, fortunately the implementation is a one-liner
-        wakeonlan.send_magic_packet(config['mac'])
+        wakeonlan.send_magic_packet(config['mac'], ip_address='192.168.0.255')  # broadcast address
 
-        time.sleep(2)  # Give the TV time so it can receive the command
+        # Wait for TV to turn on with timeout
+        start_time = time.time()
+        while not _is_tv_on(config):
+            if time.time() - start_time > 5:
+                raise TimeoutError("TV did not turn on within 5 seconds")
+            time.sleep(0.1)
+
+        time.sleep(0.5)  # Sleep an extra half second to ensure the TV can get requests
         _exec_tv_command(config, 'setInput', 'HDMI_2')
 
         time.sleep(2)  # Give the computer time to actually detect the TV before switching displays
