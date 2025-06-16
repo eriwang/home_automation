@@ -7,12 +7,12 @@ import wakeonlan
 
 import LGTV
 
-TV_NAME = 'myTv'
+TV_NAME = 'lg_55'
 
 # My own personal HDMI mappings - would be nice to take labels instead:
 # - HDMI_1: PS5
 # - HDMI_2: PC
-# - HDMI_3: Nintendo Switch
+# - HDMI_3: Nintendo Switch (2 :) )
 # - HDMI_4: Chromecast (not labeled on my TV)
 
 
@@ -77,11 +77,15 @@ def _exec_tv_command(tv_config: dict, command: str, *args):
 
 
 def _switch_displays(config: str):
-    os.system(f'E:\\Programs\\dc2.exe -configure={config}')
+    os.system(f'dc2.exe -configure={config}')
 
     # Display Changer has some annoyances where the audio doesn't swap with the display, this works around that
+    # On my PC, I also need to restart my Asus lighting service, which depends on audiosrv for some reason
+    os.system('cmd.exe /c "net stop LightingService"')
     os.system('cmd.exe /c "net stop audiosrv"')
+
     os.system('cmd.exe /c "net start audiosrv"')
+    os.system('cmd.exe /c "net start LightingService"')
 
 
 if __name__ == '__main__':
